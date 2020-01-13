@@ -11,6 +11,8 @@ Things you may want to cover:
 
 * Configuration
 
+- Add `RUBYOPT='-W:no-deprecated -W:no-experimental'` to your ruby interpreter since ruby 2.7 with Rails 6.0.2.1 still has many deprecation errors.  
+
 * Database creation
 
 * Database initialization
