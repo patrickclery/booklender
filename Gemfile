@@ -19,6 +19,7 @@ group :test do
   gem 'database_cleaner'
   gem 'factory_bot'
   gem 'factory_bot_rails'
+  gem 'faker'
   gem 'rspec',          '~> 3.8'
   gem 'rspec-core',     '~> 3.8'
   gem 'rspec-rails',    '~> 3.8'

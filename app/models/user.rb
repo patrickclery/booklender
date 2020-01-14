@@ -1,9 +1,8 @@
 class User < ApplicationRecord
-  validates_numericality_of :balance
+  has_many :transactions
 
   validates_presence_of :account_number
-  validates_presence_of :balance
+  validates_presence_of :created_at
   validates_presence_of :name
 
-  monetize :balance
 end
