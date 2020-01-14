@@ -12,10 +12,14 @@ RSpec.describe User, type: :model do
   end
 
   context 'validations' do
+
+    subject { build(:user) }
+
     it { should validate_presence_of(:account_number) }
     it { should validate_presence_of(:name) }
     it { should validate_presence_of(:created_at) }
     it { should_not validate_presence_of(:updated_at) }
+    it { should be_valid }
   end
 
 end

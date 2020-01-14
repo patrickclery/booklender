@@ -26,6 +26,7 @@ RSpec.describe Transaction, type: :model do
     it { should_not validate_presence_of(:returned_at) }
     it { should allow_value(1.week.ago).for(:returned_at) }
     it { should monetize(:amount_cents).presence }
+    it { should be_valid }
 
   end
 

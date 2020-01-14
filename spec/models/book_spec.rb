@@ -11,10 +11,11 @@ RSpec.describe Book, type: :model do
   end
 
   context 'validations' do
-    subject { build_stubbed(:book) }
+    subject { build(:book) }
     it { should validate_presence_of(:title) }
     it { should validate_presence_of(:created_at) }
     it { should_not validate_presence_of(:updated_at) }
+    it { should be_valid }
   end
 
 end
