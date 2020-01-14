@@ -1,9 +1,9 @@
 FactoryBot.define do
   factory :transaction do
-    book
-    user
     amount_cents { 0.25 }
+    book
     created_at { Faker::Time.between(from: 1.year.ago, to: 10.days.ago) }
+    user
 
     trait :returned do
       returned_at { Faker::Time.backward(10) }
