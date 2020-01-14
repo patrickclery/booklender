@@ -16,9 +16,9 @@ ActiveRecord::Schema.define(version: 1) do
   enable_extension "plpgsql"
 
   create_table "users", force: :cascade do |t|
-    t.string   "account_number", null: false
-    t.decimal  "balance",        null: false, precision: 3, scale: 2
-    t.string   "name",           null: false
+    t.string   "account_number",  null: false
+    t.integer  "balance_centers", null: false
+    t.string   "name",            null: false
 
     t.datetime "created_at",     null: false, precision: 6
     t.datetime "updated_at",     null: false, precision: 6
