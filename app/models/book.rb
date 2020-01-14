@@ -1,8 +1,8 @@
 class Book < ApplicationRecord
-  validates_presence_of :title
-  validates_presence_of :created_at
+  has_many :transactions
 
+  validates_presence_of :created_at
+  validates_presence_of :title
   validates_uniqueness_of :title
 
-  has_many :transactions
 end
