@@ -17,7 +17,8 @@ ActiveRecord::Schema.define(version: 3) do
 
   create_table "books", force: :cascade do |t|
     t.string "title", null: false
-    t.datetime "created_at", precision: 6, null: false
+    t.string "author", null: false
+    t.datetime "created_at", precision: 6
     t.datetime "updated_at", precision: 6
   end
 
@@ -25,7 +26,7 @@ ActiveRecord::Schema.define(version: 3) do
     t.bigint "user_id", null: false
     t.bigint "book_id", null: false
     t.integer "amount_cents", null: false
-    t.datetime "created_at", precision: 6, null: false, default: -> { 'CURRENT_TIMESTAMP' }
+    t.datetime "created_at", precision: 6
     t.datetime "returned_at", precision: 6
     t.index ["book_id"], name: "index_transactions_on_book_id"
     t.index ["user_id"], name: "index_transactions_on_user_id"
@@ -35,7 +36,7 @@ ActiveRecord::Schema.define(version: 3) do
     t.string "account_number", null: false
     t.string "name", null: false
     t.integer "balance_cents", null: false
-    t.datetime "created_at", precision: 6, null: false
+    t.datetime "created_at", precision: 6
     t.datetime "updated_at", precision: 6
   end
 
