@@ -18,7 +18,7 @@ RSpec.describe Transaction, type: :model do
     let!(:user) { create(:user) }
     let!(:book) { create(:book) }
 
-    subject { Transaction.new(user: user, book: book) }
+    subject { Transaction.new(user: user, book: book) } # Using the real class here because factory_bot behaves differently with stubbing class constants
 
     it { should validate_presence_of(:user) }
     it { should validate_presence_of(:book) }
