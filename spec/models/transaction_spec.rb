@@ -15,19 +15,21 @@ RSpec.describe Transaction, type: :model do
 
   context 'validations' do
 
-    let!(:user) { build_stubbed(:user) }
-    let!(:book) { build_stubbed(:book) }
+    let!(:user) { create(:user) }
+    let!(:book) { create(:book) }
 
-    subject { build(:transaction, user: user, book: book) }
+    subject { Transaction.new(user: user, book: book) }
 
     it { should validate_presence_of(:user) }
     it { should validate_presence_of(:book) }
-    it { should validate_presence_of(:created_at) }
     it { should_not validate_presence_of(:returned_at) }
     it { should allow_value(1.week.ago).for(:returned_at) }
+    it { should allow_value(99).for(:amount_cents).presence }
     it { should monetize(:amount_cents).presence }
+    it 'should use the default rental fee' do
+      stub_const("Transaction::RENTAL_FEE", 555)
+      should have_attributes(amount_cents: 555)
+    end
     it { should be_valid }
-
   end
-
 end

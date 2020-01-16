@@ -25,7 +25,7 @@ ActiveRecord::Schema.define(version: 3) do
     t.bigint "user_id", null: false
     t.bigint "book_id", null: false
     t.integer "amount_cents", null: false
-    t.datetime "created_at", precision: 6, null: false
+    t.datetime "created_at", precision: 6, null: false, default: -> { 'CURRENT_TIMESTAMP' }
     t.datetime "returned_at", precision: 6
     t.index ["book_id"], name: "index_transactions_on_book_id"
     t.index ["user_id"], name: "index_transactions_on_user_id"
