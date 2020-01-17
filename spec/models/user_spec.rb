@@ -2,8 +2,9 @@ RSpec.describe User, type: :model do
 
   context 'associations' do
     it { should have_many(:transactions) }
-    it { should have_many(:books).through(:transactions).conditions(returned_at: nil) }
-    it { should have_many(:books_history).through(:transactions) }
+    it { should have_many(:books).through(:transactions).order('transactions.created_at').source(:book) }
+    it { should have_many(:returned_books).through(:transactions).conditions('transactions.returned_at IS NOT NULL').order('transactions.returned_at').source(:book) }
+    it { should have_many(:loaned_books).through(:transactions).conditions(returned_at: nil).order('transactions.created_at').source(:book) }
   end
 
   context 'schema' do
