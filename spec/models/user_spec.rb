@@ -2,6 +2,8 @@ RSpec.describe User, type: :model do
 
   context 'associations' do
     it { should have_many(:transactions) }
+    it { should have_many(:books).through(:transactions).conditions(returned_at: nil) }
+    it { should have_many(:books_history).through(:transactions) }
   end
 
   context 'schema' do
