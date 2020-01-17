@@ -26,4 +26,6 @@ RSpec.describe User, type: :model do
     it { should be_valid }
   end
 
+  describe "#current_rental"
+
 end
