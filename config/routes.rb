@@ -3,4 +3,7 @@ Rails.application.routes.draw do
   resources :users do
     resources :transactions
   end
+  resources :books do
+    resources :transactions
+  end
 end
