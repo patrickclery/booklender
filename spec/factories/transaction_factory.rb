@@ -6,7 +6,7 @@ FactoryBot.define do
     user
 
     trait :returned do
-      returned_at { Faker::Time.backward(10) }
+      returned_at { Faker::Time.backward(days: 10) }
     end
   end
 
