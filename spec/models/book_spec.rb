@@ -8,9 +8,9 @@ RSpec.describe Book, type: :model do
   # Create 12 books total
   let!(:book_stack) { create_list(:book, 12, title: "The Outsider", author: "Albert Camus") }
   # There should be 2 loaned, 1 returned, 9 never rented
-  let!(:book_rental_transaction1) { create(:transaction, user: user1, book: book_stack.first) }
-  let!(:book_rental_transaction2) { create(:transaction, user: user2, book: book_stack.second) }
-  let!(:book_rental_transaction3) { create(:transaction, :returned, user: user2, book: book_stack.third) }
+  let!(:book_rental_transaction1) { create(:transaction, user: user1, book: book_stack.first,  amount_cents: 25) }
+  let!(:book_rental_transaction2) { create(:transaction, user: user2, book: book_stack.second, amount_cents: 25) }
+  let!(:book_rental_transaction3) { create(:transaction, :returned, user: user2, book: book_stack.third, amount_cents: 25) }
 
   context 'associations' do
     it { should have_many(:transactions) }
@@ -51,6 +51,18 @@ RSpec.describe Book, type: :model do
     subject { build(:book, title: "The Outsider", author: "Albert Camus") }
     it { should respond_to(:remaining_copies) }
     it { expect(subject.remaining_copies).to eq 10 }
+  end
+
+  describe '#total_income' do
+    subject { described_class }
+    it { should respond_to(:total_income).with_keywords(:title, :author) }
+    it { expect(subject.total_income(title: "The Outsider", author: "Albert Camus")).to eq 75 }
+  end
+
+  describe '.total_income' do
+    subject { build(:book, title: "The Outsider", author: "Albert Camus") }
+    it { should respond_to(:total_income) }
+    it { expect(subject.total_income).to eq 75 }
   end
 
 end

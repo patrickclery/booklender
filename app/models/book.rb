@@ -12,6 +12,10 @@ class Book < ApplicationRecord
     Book.remaining_copies(title: title, author: author)
   end
 
+  def total_income
+    Book.total_income(title: title, author: author)
+  end
+
   class << self
 
     def total_copies(title:, author:)
@@ -20,7 +24,7 @@ class Book < ApplicationRecord
 
     def remaining_copies(title:, author:)
       # If any rows exist for the book in transactions where the `returned_at` is NULL, then it has yet to be returned. So only return where it's not null
-      sql =<<SQL
+      sql = <<SQL
 SELECT *
 FROM books b
 WHERE
@@ -34,7 +38,22 @@ WHERE
       t.returned_at IS NULL
     )
 SQL
-      Book.find_by_sql([sql, {title: title, author: author}]).count
+      Book.find_by_sql([sql, { title: title, author: author }]).count
+    end
+
+    def total_income(title:, author:)
+      sql = <<SQL
+SELECT sum(amount_cents) AS total_income_cents
+FROM
+  transactions t
+    JOIN books b ON b.id = t.book_id
+WHERE
+  b.title = :title AND
+  b.author = :author
+GROUP BY
+  b.title, b.author
+SQL
+      Book.find_by_sql([sql, { title: title, author: author }]).first.total_income_cents
     end
 
   end
