@@ -7,10 +7,11 @@ RSpec.describe Book, type: :model do
 
   # Create 12 books total
   let!(:book_stack) { create_list(:book, 12, title: "The Outsider", author: "Albert Camus") }
+
   # There should be 2 loaned, 1 returned, 9 never rented
-  let!(:book_rental_transaction1) { create(:transaction, user: user1, book: book_stack.first,  amount_cents: 25) }
-  let!(:book_rental_transaction2) { create(:transaction, user: user2, book: book_stack.second, amount_cents: 25) }
-  let!(:book_rental_transaction3) { create(:transaction, :returned, user: user2, book: book_stack.third, amount_cents: 25) }
+  let!(:book_rental_transaction1) { create(:transaction, user: user1, book: book_stack.first, amount_cents: 25, created_at: DateTime.new(2020, 1, 1)) }
+  let!(:book_rental_transaction2) { create(:transaction, user: user2, book: book_stack.second, amount_cents: 25, created_at: DateTime.new(2020, 1, 3)) }
+  let!(:book_rental_transaction3) { create(:transaction, :returned, user: user2, book: book_stack.third, amount_cents: 25, created_at: DateTime.new(2020, 1, 5)) }
 
   context 'associations' do
     it { should have_many(:transactions) }
@@ -32,7 +33,7 @@ RSpec.describe Book, type: :model do
   describe '#total_copies' do
     subject { described_class }
     it { should respond_to(:total_copies).with_keywords(:title, :author) }
-    it { expect(subject.total_copies(title: "The Outsider", author: "Albert Camus")).to eq 12 }
+    it { expect(Book.total_copies(title: "The Outsider", author: "Albert Camus")).to eq 12 }
   end
 
   describe '.total_copies' do
@@ -44,7 +45,7 @@ RSpec.describe Book, type: :model do
   describe '#remaining_copies' do
     subject { described_class }
     it { should respond_to(:remaining_copies).with_keywords(:title, :author) }
-    it { expect(subject.remaining_copies(title: "The Outsider", author: "Albert Camus")).to eq 10 }
+    it { expect(Book.remaining_copies(title: "The Outsider", author: "Albert Camus")).to eq 10 }
   end
 
   describe '.remaining_copies' do
@@ -55,14 +56,20 @@ RSpec.describe Book, type: :model do
 
   describe '#total_income' do
     subject { described_class }
-    it { should respond_to(:total_income).with_keywords(:title, :author) }
-    it { expect(subject.total_income(title: "The Outsider", author: "Albert Camus")).to eq 75 }
+    let!(:start_date) { DateTime.new(2020, 1, 2) }
+    let!(:end_date) { DateTime.new(2020, 1, 6) }
+
+    it { should respond_to(:total_income).with_keywords(:title, :author, :from, :to) }
+    it { expect(Book.total_income(title: "The Outsider", author: "Albert Camus", from: start_date, to: end_date)).to eq 50 }
   end
 
   describe '.total_income' do
     subject { build(:book, title: "The Outsider", author: "Albert Camus") }
-    it { should respond_to(:total_income) }
-    it { expect(subject.total_income).to eq 75 }
+    let!(:start_date) { DateTime.new(2020, 1, 2) }
+    let!(:end_date) { DateTime.new(2020, 1, 6) }
+
+    it { should respond_to(:total_income).with_keywords(:from, :to) }
+    it { expect(subject.total_income(from: start_date, to: end_date)).to eq 50 }
   end
 
 end

@@ -12,8 +12,8 @@ class Book < ApplicationRecord
     Book.remaining_copies(title: title, author: author)
   end
 
-  def total_income
-    Book.total_income(title: title, author: author)
+  def total_income(from: nil, to: nil)
+    Book.total_income(title: title, author: author, from: from, to: to)
   end
 
   class << self
@@ -41,19 +41,35 @@ SQL
       Book.find_by_sql([sql, { title: title, author: author }]).count
     end
 
-    def total_income(title:, author:)
+    # @param String title
+    # @param String author
+    # @param DateTime from
+    # @param DateTime to
+    def total_income(title:, author:, from: nil, to: nil)
+
+      params = {
+        title: title,
+        author: author
+      }
+
       sql = <<SQL
 SELECT sum(amount_cents) AS total_income_cents
 FROM
   transactions t
-    JOIN books b ON b.id = t.book_id
+    LEFT JOIN books b ON b.id = t.book_id
 WHERE
   b.title = :title AND
   b.author = :author
-GROUP BY
-  b.title, b.author
 SQL
-      Book.find_by_sql([sql, { title: title, author: author }]).first.total_income_cents
+
+      # Insert date/time condition
+      if from.present? and to.present?
+        sql += ' AND t.created_at BETWEEN :from AND :to'
+        params.merge!({from: from, to: to})
+      end
+
+      sql += ' GROUP BY b.title, b.author'
+      Book.find_by_sql([sql, params]).pluck(:total_income_cents).first
     end
 
   end
