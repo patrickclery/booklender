@@ -16,7 +16,6 @@ gem 'bootsnap', '>= 1.4.2', require: false
 gem 'money-rails'
 
 group :test do
-  gem 'database_cleaner'
   gem 'factory_bot'
   gem 'factory_bot_rails'
   gem 'faker'

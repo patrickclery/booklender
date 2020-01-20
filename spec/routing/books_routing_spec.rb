@@ -8,6 +8,10 @@ RSpec.describe BooksController, type: :routing do
       expect(:get => "/books/1").to route_to("books#show", :id => "1")
     end
 
+    it "routes to #income" do
+      expect(:get => "/books/1/income").to route_to("books#income", :id => "1")
+    end
+
 
     it "routes to #create" do
       expect(:post => "/books").to route_to("books#create")

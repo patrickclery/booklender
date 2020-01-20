@@ -67,7 +67,6 @@ GEM
       url
     concurrent-ruby (1.1.5)
     crass (1.0.6)
-    database_cleaner (1.7.0)
     debase (0.2.4.1)
       debase-ruby_core_source (>= 0.10.2)
     debase-ruby_core_source (0.10.9)
@@ -231,7 +230,6 @@ PLATFORMS
 DEPENDENCIES
   bootsnap (>= 1.4.2)
   codecov
-  database_cleaner
   debase
   factory_bot
   factory_bot_rails

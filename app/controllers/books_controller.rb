@@ -1,5 +1,5 @@
 class BooksController < ApplicationController
-  before_action :set_book, only: [:show, :update, :destroy]
+  before_action :set_book, only: [:show, :update, :destroy, :income]
 
   def index
     @books = Book.all
@@ -31,6 +31,13 @@ class BooksController < ApplicationController
 
   def destroy
     @book.destroy
+  end
+
+  def income
+    render json: @book.as_json(
+      only: [:id, :title, :author, :created_at],
+      methods: :total_income
+    )
   end
 
   private
