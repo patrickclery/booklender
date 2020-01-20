@@ -5,14 +5,14 @@ RSpec.describe BooksController, type: :controller do
   # adjust the attributes here as well.
   let(:valid_attributes) do
     {
-      title: "Rework",
+      title:  "Rework",
       author: "David Heinemeier Hansson and Jason Fried"
     }
   end
 
   let(:invalid_attributes) do
     {
-      title: nil,
+      title:  nil,
       author: nil
     }
   end
@@ -20,6 +20,17 @@ RSpec.describe BooksController, type: :controller do
   # in order to pass any filters (e.g. authentication) defined in
   # BooksController. Be sure to keep this updated too.
   let(:valid_session) { {} }
+
+  let!(:user1) { create(:user) }
+  let!(:user2) { create(:user) }
+
+  # Create 12 books total
+  let!(:book_stack) { create_list(:book, 12, title: "The Outsider", author: "Albert Camus") }
+
+  # There should be 2 loaned, 1 returned, 9 never rented
+  let!(:book_rental_transaction1) { create(:transaction, user: user1, book: book_stack.first, amount_cents: 25, created_at: DateTime.new(2020, 1, 1)) }
+  let!(:book_rental_transaction2) { create(:transaction, user: user2, book: book_stack.second, amount_cents: 25, created_at: DateTime.new(2020, 1, 3)) }
+  let!(:book_rental_transaction3) { create(:transaction, :returned, user: user2, book: book_stack.third, amount_cents: 25, created_at: DateTime.new(2020, 1, 5)) }
 
   describe "GET #index" do
     it "returns a success response" do
@@ -35,6 +46,18 @@ RSpec.describe BooksController, type: :controller do
       get :show, params: { id: book.to_param }, session: valid_session
       expect(response).to be_successful
     end
+  end
+
+  describe "GET #income" do
+    # Stub book to not actually process total_income
+    subject! do
+      allow_any_instance_of(Book).to receive(:total_income).and_return(789)
+      get :income, params: { id: book.to_param }, session: valid_session
+    end
+    let!(:book) { create(:book) }
+
+    it { should have_http_status(:success) }
+    it { expect(JSON.parse(response.body).dig("total_income")).to eq 789 }
   end
 
   describe "POST #create" do
@@ -68,7 +91,7 @@ RSpec.describe BooksController, type: :controller do
     context "with valid params" do
       let(:new_attributes) {
         {
-          title: "Think & Grow Skillz",
+          title:  "Think & Grow Skillz",
           author: "Napoleon Dynamite"
         }
       }

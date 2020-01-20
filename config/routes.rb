@@ -5,5 +5,6 @@ Rails.application.routes.draw do
   end
   resources :books do
     resources :transactions
+    get :income, on: :member
   end
 end

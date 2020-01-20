@@ -13,6 +13,9 @@ RSpec.describe Book, type: :model do
   let!(:book_rental_transaction2) { create(:transaction, user: user2, book: book_stack.second, amount_cents: 25, created_at: DateTime.new(2020, 1, 3)) }
   let!(:book_rental_transaction3) { create(:transaction, :returned, user: user2, book: book_stack.third, amount_cents: 25, created_at: DateTime.new(2020, 1, 5)) }
 
+  let!(:start_date) { DateTime.new(2020, 1, 2) }
+  let!(:end_date) { DateTime.new(2020, 1, 6) }
+
   context 'associations' do
     it { should have_many(:transactions) }
   end
@@ -55,9 +58,6 @@ RSpec.describe Book, type: :model do
   end
 
   describe '#total_income' do
-    subject { described_class }
-    let!(:start_date) { DateTime.new(2020, 1, 2) }
-    let!(:end_date) { DateTime.new(2020, 1, 6) }
 
     it { should respond_to(:total_income).with_keywords(:title, :author, :from, :to) }
     it { expect(Book.total_income(title: "The Outsider", author: "Albert Camus", from: start_date, to: end_date)).to eq 50 }
@@ -65,8 +65,6 @@ RSpec.describe Book, type: :model do
 
   describe '.total_income' do
     subject { build(:book, title: "The Outsider", author: "Albert Camus") }
-    let!(:start_date) { DateTime.new(2020, 1, 2) }
-    let!(:end_date) { DateTime.new(2020, 1, 6) }
 
     it { should respond_to(:total_income).with_keywords(:from, :to) }
     it { expect(subject.total_income(from: start_date, to: end_date)).to eq 50 }
