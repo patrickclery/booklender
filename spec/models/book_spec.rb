@@ -58,7 +58,7 @@ RSpec.describe Book, type: :model do
   end
 
   describe '#total_income' do
-
+    subject { described_class }
     it { should respond_to(:total_income).with_keywords(:title, :author, :from, :to) }
     it { expect(Book.total_income(title: "The Outsider", author: "Albert Camus", from: start_date, to: end_date)).to eq 50 }
   end

@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [:show, :update, :destroy]
+  before_action :set_user, only: [:show, :update, :destroy, :loaned_books]
 
   def index
     @users = User.all
@@ -31,6 +31,10 @@ class UsersController < ApplicationController
 
   def destroy
     @user.destroy
+  end
+
+  def loaned_books
+    render json: @user.as_json(include: :loaned_books)
   end
 
   private
