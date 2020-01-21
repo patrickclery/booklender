@@ -48,6 +48,7 @@ RSpec.describe UsersController, type: :controller do
 
     let!(:loaned_books) { create_list(:book, 5) }
     let!(:user_with_books) { create(:user) }
+    let!(:user_attributes) { [:id, :name, :created_at, :account_number, ] }
 
     subject! do
       allow(User).to receive(:find).and_return(user_with_books)
@@ -58,6 +59,7 @@ RSpec.describe UsersController, type: :controller do
     it { should have_http_status(:success) }
     # call .as_json on the loaned_books since the timestamp will be slightly different
     it { expect(JSON.parse(response.body).dig("loaned_books")).to eq loaned_books.map(&:as_json) }
+    it { expect(JSON.parse(response.body).keys).to include("id", "name", "account_number", "balance_cents")  }
   end
 
 

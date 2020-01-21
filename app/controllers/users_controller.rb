@@ -34,10 +34,7 @@ class UsersController < ApplicationController
   end
 
   def loaned_books
-    render json: @user.as_json(
-      only: [:id, :name],
-      include: :loaned_books
-    )
+    render json: @user.as_json(include: :loaned_books)
   end
 
   private
