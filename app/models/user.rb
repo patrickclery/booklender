@@ -1,7 +1,5 @@
 class User < ApplicationRecord
   has_many :transactions
-  attribute :name
-  attribute :account_number
 
   # Books
   has_many :books, -> { order('transactions.created_at') },
