@@ -49,15 +49,18 @@ RSpec.describe BooksController, type: :controller do
   end
 
   describe "GET #income" do
-    # Stub book to not actually process total_income
+    let!(:book_with_profits) { build_stubbed(:book) }
+
     subject! do
+      allow(Book).to receive(:find).and_return(book_with_profits)
       allow_any_instance_of(Book).to receive(:total_income).and_return(789)
-      get :income, params: { id: book.to_param }, session: valid_session
+      get :income, params: { id: book_with_profits.to_param }, session: valid_session
     end
-    let!(:book) { create(:book) }
 
     it { should have_http_status(:success) }
     it { expect(JSON.parse(response.body).dig("total_income")).to eq 789 }
+    it { expect(JSON.parse(response.body).keys).to include("id", "title", "author", "total_income")  }
+
   end
 
   describe "POST #create" do

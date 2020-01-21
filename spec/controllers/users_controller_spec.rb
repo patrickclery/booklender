@@ -46,14 +46,13 @@ RSpec.describe UsersController, type: :controller do
 
   describe "GET #loans" do
 
-    let!(:loaned_books) { create_list(:book, 5) }
-    let!(:user_with_books) { create(:user) }
-    let!(:user_attributes) { [:id, :name, :created_at, :account_number, ] }
+    let!(:loaned_books) { build_stubbed_list(:book, 5) }
+    let!(:user_with_books) { build_stubbed(:user) }
 
     subject! do
       allow(User).to receive(:find).and_return(user_with_books)
       allow_any_instance_of(User).to receive(:loaned_books).and_return(loaned_books)
-      get :loaned_books, params: { id: user1.to_param }, session: valid_session
+      get :loaned_books, params: { id: user_with_books.to_param }, session: valid_session
     end
 
     it { should have_http_status(:success) }
