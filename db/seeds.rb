@@ -15,7 +15,7 @@ book3 = Book.create!(author: "Frank Herbert", title: "Prince")
 book4 = Book.create!(author: "Frank Herbert", title: "Prince")
 book5 = Book.create!(author: "Frank Herbert", title: "Sayyadina")
 
-transaction1 = Transaction.create!(user: user1, book: book1, returned_at: 1.month.ago)
-transaction2 = Transaction.create!(user: user1, book: book2)
-transaction3 = Transaction.create!(user: user2, book: book2)
+transaction1 = Transaction.create!(user: user1, book: book1, created_at: DateTime.new(2020, 1, 1), returned_at: 1.month.ago)
+transaction2 = Transaction.create!(user: user1, book: book2, created_at: DateTime.new(2020, 1, 3))
+transaction3 = Transaction.create!(user: user2, book: book2, created_at: DateTime.new(2020, 1, 5))
 

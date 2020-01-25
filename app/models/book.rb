@@ -72,7 +72,9 @@ SQL
       Book.find_by_sql([sql, params]).pluck(:total_income_cents).first
     end
 
-    def find_all_by_date(from: nil, to: nil)
+    # @param DateTime from
+    # @param DateTime to
+    def find_detailed_list(from: nil, to: nil)
       # If any rows exist for the book in transactions where the `returned_at` is NULL, then it has yet to be returned. So only return where it's not null
       sql = <<SQL
 SELECT
@@ -80,10 +82,10 @@ SELECT
   DISTINCT ON (title, author)
   id,
   title, author,
-  copies_count,
-  COALESCE(loans_count, 0) AS loans_count,
-  (copies_count - COALESCE(loans_count, 0)) AS remaining_count,
-  COALESCE(total_income, 0) AS total_income
+  available_copies_count,
+  COALESCE(loans_count, 0) AS loaned_copies_count,
+  (available_copies_count - COALESCE(loans_count, 0)) AS remaining_copies_count,
+  COALESCE(total_income, 0) AS total_income_cents
 FROM
   books books_details
 JOIN (
@@ -91,7 +93,7 @@ JOIN (
   SELECT
     title,
     author,
-    count(*) AS copies_count
+    count(*) AS available_copies_count
   FROM
     books
   GROUP BY (title, author)
@@ -106,18 +108,20 @@ LEFT JOIN (
   FROM
     books AS books_total_1
       JOIN transactions ON transactions.book_id = books_total_1.id
-  WHERE
+WHERE
+    returned_at IS NULL
 SQL
 
       params = {}
       # Insert date/time condition
       if from.present? and to.present?
-        sql += ' AND t.created_at BETWEEN :from AND :to'
+        sql += <<SQL
+    AND transactions.created_at BETWEEN :from AND :to
+SQL
         params.merge!({ from: from, to: to })
       end
 
 sql += <<SQL
-    returned_at IS NULL
   GROUP BY (title, author)
 ) books_total_2 USING (title,author)
 

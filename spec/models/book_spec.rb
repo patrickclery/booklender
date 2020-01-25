@@ -3,9 +3,6 @@ RSpec.describe Book, type: :model do
   let!(:user1) { create(:user) }
   let!(:user2) { create(:user) }
 
-  let!(:start_date) { DateTime.new(2020, 1, 2) }
-  let!(:end_date) { DateTime.new(2020, 1, 6) }
-
   context 'associations' do
     it { should have_many(:transactions) }
   end
@@ -52,6 +49,10 @@ RSpec.describe Book, type: :model do
 
   describe '#total_income' do
     subject { Book }
+
+    let!(:start_date) { DateTime.new(2020, 1, 2) }
+    let!(:end_date) { DateTime.new(2020, 1, 6) }
+
     it { should respond_to(:total_income).with_keywords(:title, :author, :from, :to) }
     it { expect(Book.total_income(title: "The Outsider", author: "Albert Camus", from: start_date, to: end_date)).to eq 50 }
   end
@@ -63,9 +64,11 @@ RSpec.describe Book, type: :model do
     it { expect(subject.total_income(from: start_date, to: end_date)).to eq 50 }
   end
 
-  describe '#find_all_by_date' do
-    subject { Book }
+  describe '#find_detailed_list' do
+    subject { Book.find_detailed_list(from: start_date, to: end_date) }
 
+    let!(:start_date) { DateTime.new(2020, 1, 2) }
+    let!(:end_date) { DateTime.new(2020, 1, 6) }
     let!(:book_stack) { create_list(:book, 12) }
     let!(:book1) { book_stack.first }
     let!(:book2) { book_stack.second }
@@ -76,8 +79,14 @@ RSpec.describe Book, type: :model do
     let!(:book_rental_transaction2) { create(:transaction, user: user2, book: book2, amount_cents: 25, created_at: DateTime.new(2020, 1, 3)) }
     let!(:book_rental_transaction3) { create(:transaction, :returned, user: user2, book: book3, amount_cents: 25, created_at: DateTime.new(2020, 1, 5)) }
 
-    it { should respond_to(:find_all_by_date).with_keywords(:from, :to) }
-    it { expect(Book.find_all_by_date).to contain_exactly(*book_stack) }
+    it { expect(Book).to respond_to(:find_detailed_list).with_keywords(:from, :to) }
+    it { expect(subject).to contain_exactly(*book_stack) }
+
+    # Check that each book has the correct income
+    it { expect(subject.sample.attributes.keys).to contain_exactly("id", "title", "author", "available_copies_count", "loaned_copies_count", "remaining_copies_count", "total_income_cents") }
+    it { expect(subject.detect{|book| book == book1}).to eq book1 }
+    it { expect(subject.detect{|book| book == book2}).to have_attributes(total_income: 25) }
+    it { expect(subject.detect{|book| book == book3}).to have_attributes(total_income: 25) }
   end
 
 end
