@@ -12,7 +12,10 @@ user2 = User.create!(name: "Zeke N. Yeshallfind", balance_cents: 100, account_nu
 book1 = Book.create!(author: "Frank Herbert", title: "Premier")
 book2 = Book.create!(author: "Frank Herbert", title: "Sayyadina")
 book3 = Book.create!(author: "Frank Herbert", title: "Prince")
+book4 = Book.create!(author: "Frank Herbert", title: "Prince")
+book5 = Book.create!(author: "Frank Herbert", title: "Sayyadina")
 
 transaction1 = Transaction.create!(user: user1, book: book1, returned_at: 1.month.ago)
 transaction2 = Transaction.create!(user: user1, book: book2)
 transaction3 = Transaction.create!(user: user2, book: book2)
+

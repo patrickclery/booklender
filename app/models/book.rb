@@ -48,7 +48,7 @@ SQL
     def total_income(title:, author:, from: nil, to: nil)
 
       params = {
-        title: title,
+        title:  title,
         author: author
       }
 
@@ -65,7 +65,114 @@ SQL
       # Insert date/time condition
       if from.present? and to.present?
         sql += ' AND t.created_at BETWEEN :from AND :to'
-        params.merge!({from: from, to: to})
+        params.merge!({ from: from, to: to })
+      end
+
+      sql += ' GROUP BY b.title, b.author'
+      Book.find_by_sql([sql, params]).pluck(:total_income_cents).first
+    end
+
+    def find_all_by_date(from: nil, to: nil)
+      # If any rows exist for the book in transactions where the `returned_at` is NULL, then it has yet to be returned. So only return where it's not null
+      sql = <<SQL
+SELECT
+  -- need this distinct since the counts as
+  DISTINCT ON (title, author)
+  id,
+  title, author,
+  copies_count,
+  COALESCE(loans_count, 0) AS loans_count,
+  (copies_count - COALESCE(loans_count, 0)) AS remaining_count,
+  COALESCE(total_income, 0) AS total_income
+FROM
+  books books_details
+JOIN (
+  --- Books available (a list of all books)
+  SELECT
+    title,
+    author,
+    count(*) AS copies_count
+  FROM
+    books
+  GROUP BY (title, author)
+  ) books_available USING (title,author)
+
+LEFT JOIN (
+  --- Books available (a list of books loaned), join it or return null
+  SELECT
+    title,
+    author,
+    count(*) AS loans_count
+  FROM
+    books AS books_total_1
+      JOIN transactions ON transactions.book_id = books_total_1.id
+  WHERE
+SQL
+
+      params = {}
+      # Insert date/time condition
+      if from.present? and to.present?
+        sql += ' AND t.created_at BETWEEN :from AND :to'
+        params.merge!({ from: from, to: to })
+      end
+
+sql += <<SQL
+    returned_at IS NULL
+  GROUP BY (title, author)
+) books_total_2 USING (title,author)
+
+--- Grabs the total income
+LEFT JOIN (
+  SELECT
+    title,
+    author,
+    sum(amount_cents) AS total_income
+  FROM
+    books
+  JOIN transactions ON transactions.book_id = books.id
+SQL
+
+      # Insert date/time condition
+      if from.present? and to.present?
+        sql += <<SQL
+WHERE
+  transactions.created_at BETWEEN :from AND :to
+SQL
+      end
+
+      sql += <<SQL
+  GROUP BY (title, author)
+) books_total_3 USING (title,author)
+SQL
+
+      Book.find_by_sql([sql, params])
+    end
+
+    # @param String title
+    # @param String author
+    # @param DateTime from
+    # @param DateTime to
+    def total_income(title:, author:, from: nil, to: nil)
+
+      params = {
+        title:  title,
+        author: author
+      }
+
+      sql = <<SQL
+SELECT sum(amount_cents) AS total_income_cents
+FROM
+  transactions t
+    LEFT JOIN books b ON b.id = t.book_id
+WHERE
+  b.title = :title AND
+  b.author = :author
+SQL
+
+      # Insert date/time condition
+      if from.present? and to.present?
+        sql += ' AND t.created_at BETWEEN :from AND :to'
+        params.merge!({ from: from, to: to })
       end
 
       sql += ' GROUP BY b.title, b.author'
