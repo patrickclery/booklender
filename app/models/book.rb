@@ -1,6 +1,8 @@
 class Book < ApplicationRecord
   has_many :transactions
 
+  attribute :total_income_cents
+
   validates_presence_of :title
   validates_presence_of :author
 
