@@ -2,6 +2,8 @@ class Book < ApplicationRecord
   has_many :transactions
 
   attribute :total_income_cents
+  attribute :remaining_copies_count
+  attribute :copies_count
 
   validates_presence_of :title
   validates_presence_of :author
@@ -10,15 +12,20 @@ class Book < ApplicationRecord
     extended_details.copies_count
   end
 
+  def remaining_copies
+    extended_details.remaining_copies_count
+  end
+
   def total_income(from: nil, to: nil)
     extended_details(from: from, to: to).total_income_cents
   end
 
   def extended_details(from: nil, to: nil)
-    @details = Book.extended_details(from: from, to: to, title: title, author: author).first
+    # Add a ||= in-case someone calls .total_income then .remaining_copies
+    @details ||= Book.extended_details(from: from, to: to, title: title, author: author).first
   end
 
-  class << self
+  class << Book
 
     # @param String title
     # @param String author
@@ -35,8 +42,8 @@ SELECT
   title, author,
   copies_count,
   COALESCE(loans_count, 0) AS loaned_copies_count,
-  (copies_count - COALESCE(loans_count, 0)) AS remaining_copies_count,
-  COALESCE(total_income, 0) AS total_income_cents
+  (copies_count - COALESCE(books_total_2.loans_count, 0)) AS remaining_copies_count,
+  COALESCE(books_total_3.total_income, 0) AS total_income_cents
 FROM
   books books_details
 JOIN (
