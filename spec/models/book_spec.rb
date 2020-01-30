@@ -20,16 +20,16 @@ RSpec.describe Book, type: :model do
   end
 
   describe '.total_copies' do
-    subject { book.total_copies }
+    subject { book.extended_details.copies_count }
     let!(:book_stack) { create_list(:book, 12, title: "How to Cook Stuff", author: "Chef Joe") }
     let!(:book) { book_stack.first }
 
-    it { expect(book).to respond_to(:total_copies).with(0).arguments }
+    it { expect(book).to respond_to(:copies_count).with(0).arguments }
     it { should eq 12 }
   end
 
-  describe '.remaining_copies' do
-    subject { book.remaining_copies }
+  describe '.remaining_copies_count' do
+    subject { book.extended_details.remaining_copies_count }
     let!(:book_stack) { create_list(:book, 12, title: "How to Cook Stuff", author: "Chef Joe") }
     let!(:user) { create(:user) }
     let!(:book) { book_stack.first }
@@ -39,13 +39,17 @@ RSpec.describe Book, type: :model do
       1.upto(3) do |i|
         create(:transaction, book: book_stack[i-1], user: user)
       end
+      # Make an arbitrary amount of returned transactions (they should not interfere)
+      4.upto(7) do |i|
+        create(:transaction, :returned, book: book_stack[i-1], user: user)
+      end
     end
 
-    it { expect(book).to respond_to(:remaining_copies).with(0).arguments }
+    it { expect(book).to respond_to(:extended_details, :remaining_copies_count).with(0).arguments }
     it { should eq 9 } # 12 copies - 9 copies = 3
   end
 
-  describe '.total_income' do
+  describe '.total_income_count' do
 
     subject { book }
 
@@ -61,11 +65,10 @@ RSpec.describe Book, type: :model do
     let!(:start_date2) { DateTime.new(2020, 1, 1) }
     let!(:end_date2) { DateTime.new(2020, 1, 2) }
 
-    it { should respond_to(:total_income).with(0).arguments }
-    it { should respond_to(:total_income).with_keywords(:from, :to) }
-    it { expect(subject.total_income(from: start_date1, to: end_date1)).to be 25 }
-    it { expect(subject.total_income(from: start_date2, to: end_date2)).to be 0 }
-    it { expect(subject.total_income).to be 50 }
+    it { should respond_to(:extended_details, :total_income_cents) }
+    it { expect(subject.extended_details(from: start_date1, to: end_date1).total_income_cents).to be 25 }
+    it { expect(subject.extended_details(from: start_date2, to: end_date2).total_income_cents).to be 0 }
+    it { expect(subject.extended_details.total_income_cents).to be 50 }
 
   end
 
@@ -91,7 +94,7 @@ RSpec.describe Book, type: :model do
       it { expect(Book).to respond_to(:extended_details).with(0).arguments }
       it { expect(Book).to respond_to(:extended_details).with_keywords(:title, :author) }
       it { expect(subject).to contain_exactly(*book_stack) }
-      it { expect(subject.sample.attributes.keys).to contain_exactly("id", "title", "author", "copies_count", "loaned_copies_count", "remaining_copies_count", "total_income_cents") }
+      it { expect(subject.sample.attributes.keys).to contain_exactly("id", "title", "author", "copies_count", "loaned_copies_count", "remaining_copies_count", "total_income_cents", "created_at") }
       # Check that each book has the correct income
       it { expect(subject.detect { |book| book == book1 }).to have_attributes(total_income_cents: 25) }
       it { expect(subject.detect { |book| book == book2 }).to have_attributes(total_income_cents: 25) }
@@ -106,7 +109,7 @@ RSpec.describe Book, type: :model do
 
       it { expect(Book).to respond_to(:extended_details).with_keywords(:from, :to, :title, :author) }
       it { expect(subject).to contain_exactly(*book_stack) }
-      it { expect(subject.sample.attributes.keys).to contain_exactly("id", "title", "author", "copies_count", "loaned_copies_count", "remaining_copies_count", "total_income_cents") }
+      it { expect(subject.sample.attributes.keys).to contain_exactly("id", "title", "author", "copies_count", "loaned_copies_count", "remaining_copies_count", "total_income_cents", "created_at") }
       # Check that each book has the correct income
       it { expect(subject.detect { |book| book == book1 }).to have_attributes(total_income_cents: 0) }
       it { expect(subject.detect { |book| book == book2 }).to have_attributes(total_income_cents: 25) }

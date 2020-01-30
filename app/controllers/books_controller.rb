@@ -1,14 +1,19 @@
 class BooksController < ApplicationController
   before_action :set_book, only: [:show, :update, :destroy, :income]
 
+  # 3. Query the account of a user and the details of the current borrowed book, The parameter is the user.
   def index
-    @books = Book.all
+    @books = Book.extended_details
 
-    render json: @books
+    render json: @books.as_json(
+      only: [:id, :title, :author, :created_at, :total_income_cents, :copies_count, :remaining_copies_count, :loaned_copies_count]
+    )
   end
 
   def show
-    render json: @book
+    render json: @book.extended_details.as_json(
+      only: [:id, :title, :author, :created_at, :total_income_cents, :copies_count, :remaining_copies_count, :loaned_copies_count]
+    )
   end
 
   def create
@@ -33,13 +38,6 @@ class BooksController < ApplicationController
     @book.destroy
   end
 
-  def income
-    render json: @book.as_json(
-      only: [:id, :title, :author, :created_at],
-      methods: :total_income
-    )
-  end
-
   private
 
   def set_book
@@ -47,6 +45,6 @@ class BooksController < ApplicationController
   end
 
   def book_params
-    params.require(:book).permit(:id, :title, :author)
+    params.require(:book).permit(:id, :title, :author, :from, :to)
   end
 end

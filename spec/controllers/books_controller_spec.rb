@@ -21,46 +21,40 @@ RSpec.describe BooksController, type: :controller do
   # BooksController. Be sure to keep this updated too.
   let(:valid_session) { {} }
 
-  let!(:user1) { create(:user) }
-  let!(:user2) { create(:user) }
-
-  # Create 12 books total
-  let!(:book_stack) { create_list(:book, 12, title: "The Outsider", author: "Albert Camus") }
-
-  # There should be 2 loaned, 1 returned, 9 never rented
-  let!(:book_rental_transaction1) { create(:transaction, user: user1, book: book_stack.first, amount_cents: 25, created_at: DateTime.new(2020, 1, 1)) }
-  let!(:book_rental_transaction2) { create(:transaction, user: user2, book: book_stack.second, amount_cents: 25, created_at: DateTime.new(2020, 1, 3)) }
-  let!(:book_rental_transaction3) { create(:transaction, :returned, user: user2, book: book_stack.third, amount_cents: 25, created_at: DateTime.new(2020, 1, 5)) }
-
   describe "GET #index" do
-    it "returns a success response" do
-      book = Book.create! valid_attributes
-      get :index, params: {}, session: valid_session
-      expect(response).to be_successful
+    # Note, semantics here are important: before must come before "subject!"
+    before do
+      allow(Book).to receive(:extended_details).and_return(book_stack)
     end
+
+    subject! { get :index, session: valid_session }
+
+    # Create a list of 12 books and stub the extended details using ":stub_copies" trait
+    let!(:book_stack) { create_list(:book, 12, :stub_copies) }
+
+    it { should be_successful }
+    it { expect(response.content_type).to eq("application/json; charset=utf-8") }
+    it { expect(JSON.parse(response.body)).to be_an Array }
+    it { expect(JSON.parse(response.body).first.keys).to include("id", "title", "author", "created_at", "total_income_cents", "copies_count", "remaining_copies_count", "loaned_copies_count") }
+    it { expect(JSON.parse(response.body).size).to eq 12 }
   end
 
   describe "GET #show" do
-    it "returns a success response" do
-      book = Book.create! valid_attributes
-      get :show, params: { id: book.to_param }, session: valid_session
-      expect(response).to be_successful
+    # Note, semantics here are important: before must come before "subject!"
+    before do
+      allow_any_instance_of(Book).to receive(:extended_details).and_return(book)
     end
-  end
 
-  describe "GET #income" do
-    let!(:book_with_profits) { build_stubbed(:book) }
+    subject! { get :show, params: { id: book.to_param }, session: valid_session }
 
-    subject! do
-      allow(Book).to receive(:find).and_return(book_with_profits)
-      allow_any_instance_of(Book).to receive(:total_income).and_return(789)
-      get :income, params: { id: book_with_profits.to_param }, session: valid_session
-    end
+    # Create 2 transaction with a total of 50 cents
+    let!(:book) { create(:book, :stub_copies) }
 
     it { should have_http_status(:success) }
-    it { expect(JSON.parse(response.body).dig("total_income")).to eq 789 }
-    it { expect(JSON.parse(response.body).keys).to include("id", "title", "author", "total_income")  }
-
+    it { expect(JSON.parse(response.body).keys).to include("id", "title", "author", "created_at", "total_income_cents", "copies_count", "remaining_copies_count", "loaned_copies_count") }
+    it { expect(response.content_type).to eq("application/json; charset=utf-8") }
+    it { expect(JSON.parse(response.body)).to be_a Hash }
+    it { expect(JSON.parse(response.body).keys).to include("id", "title", "author", "created_at", "total_income_cents", "copies_count", "remaining_copies_count", "loaned_copies_count") }
   end
 
   describe "POST #create" do
