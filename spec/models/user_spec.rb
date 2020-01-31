@@ -4,7 +4,7 @@ RSpec.describe User, type: :model do
     it { should have_many(:transactions) }
     it { should have_many(:books).through(:transactions).order('transactions.created_at').source(:book) }
     it { should have_many(:returned_books).through(:transactions).conditions('transactions.returned_at IS NOT NULL').order('transactions.returned_at').source(:book) }
-    it { should have_many(:loaned_books).through(:transactions).conditions(returned_at: nil).order('transactions.created_at').source(:book) }
+    it { should have_many(:loaned_books).through(:transactions).conditions('transactions.returned_at IS NULL').order('transactions.created_at').source(:book) }
   end
 
   context 'schema' do
@@ -27,6 +27,34 @@ RSpec.describe User, type: :model do
     it { should_not validate_presence_of(:updated_at) }
     it { should monetize(:balance_cents) }
     it { should be_valid }
+  end
+
+  describe ".loaned_books_count" do
+    # Note, semantics here are important: before must come before "subject!"
+    before do
+      allow_any_instance_of(User).to receive(:loaned_books).and_return(loaned_books)
+    end
+
+    subject { user.loaned_books_count }
+    let!(:loaned_books) { build_stubbed_list(:book, 4) }
+    let!(:user) { build_stubbed(:user) }
+
+    it { expect(user).to respond_to(:loaned_books_count) }
+    it { should eq 4 }
+  end
+
+  describe ".returned_books_count" do
+    # Note, semantics here are important: before must come before "subject!"
+    before do
+      allow_any_instance_of(User).to receive(:returned_books).and_return(returned_books)
+    end
+
+    subject { user.returned_books_count }
+    let!(:returned_books) { create_list(:book, 4) }
+    let!(:user) { create(:user) }
+
+    it { expect(user).to respond_to(:returned_books_count) }
+    it { should eq 4 }
   end
 
 end

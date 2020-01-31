@@ -4,11 +4,18 @@ class UsersController < ApplicationController
   def index
     @users = User.all
 
-    render json: @users
+    render json: @users.as_json(
+      only: [:id, :account_number, :balance_cents, :name, :created_at],
+      include: [:loaned_books, :returned_books],
+      methods: [:returned_books_count, :loaned_books_count]
+    )
   end
 
   def show
-    render json: @user
+    render json: @user.as_json(
+      only: [:id, :account_number, :balance_cents, :name, :created_at],
+      include: [:returned_books, :loaned_books]
+    )
   end
 
   def create
@@ -31,10 +38,6 @@ class UsersController < ApplicationController
 
   def destroy
     @user.destroy
-  end
-
-  def loaned_books
-    render json: @user.as_json(include: :loaned_books)
   end
 
   private

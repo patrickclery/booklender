@@ -17,50 +17,47 @@ RSpec.describe UsersController, type: :controller do
   end
   let(:valid_session) { {} }
 
-  let!(:user1) { create(:user) }
-  let!(:user2) { create(:user) }
-
-  # Create 12 books total
-  let!(:book_stack) { create_list(:book, 12, title: "The Outsider", author: "Albert Camus") }
-
-  # There should be 2 loaned, 1 returned, 9 never rented
-  let!(:book_rental_transaction1) { create(:transaction, user: user1, book: book_stack.first, amount_cents: 25, created_at: DateTime.new(2020, 1, 1)) }
-  let!(:book_rental_transaction2) { create(:transaction, user: user2, book: book_stack.second, amount_cents: 25, created_at: DateTime.new(2020, 1, 3)) }
-  let!(:book_rental_transaction3) { create(:transaction, :returned, user: user2, book: book_stack.third, amount_cents: 25, created_at: DateTime.new(2020, 1, 5)) }
-
   describe "GET #index" do
-    it "returns a success response" do
-      user = User.create! valid_attributes
-      get :index, params: {}, session: valid_session
-      expect(response).to be_successful
+    # Note, semantics here are important: before must come before "subject!"
+    before do
+      allow(User).to receive(:extended_details).and_return(users)
     end
+
+    subject! { get :index, session: valid_session }
+
+    # Create a list of 12 books and stub the extended details using ":stub_copies" trait
+    let(:users) { create_list(:user, 3) }
+
+    it { expect(subject).to have_http_status(:success) }
+    it { expect(response.content_type).to eq("application/json; charset=utf-8") }
+    it { expect(JSON.parse(response.body)).to be_an Array }
+    it { expect(JSON.parse(response.body).first.keys).to include("id", "account_number", "name", "balance_cents", "created_at", "loaned_books_count", "returned_books_count") }
+    it { expect(JSON.parse(response.body).size).to eq 3 }
   end
 
   describe "GET #show" do
-    it "returns a success response" do
-      user = User.create! valid_attributes
-      get :show, params: { id: user.to_param }, session: valid_session
-      expect(response).to be_successful
-    end
-  end
-
-  describe "GET #loans" do
-
-    let!(:loaned_books) { build_stubbed_list(:book, 5) }
-    let!(:user_with_books) { build_stubbed(:user) }
-
-    subject! do
-      allow(User).to receive(:find).and_return(user_with_books)
+    # Note, semantics here are important: before must come before "subject!"
+    before do
+      allow_any_instance_of(User).to receive(:returned_books).and_return(returned_books)
       allow_any_instance_of(User).to receive(:loaned_books).and_return(loaned_books)
-      get :loaned_books, params: { id: user_with_books.to_param }, session: valid_session
+      allow_any_instance_of(User).to receive(:books).and_return(books)
+      allow(User).to receive(:find).and_return(user)
     end
+
+    subject! { get :show, params: { id: user.to_param }, session: valid_session }
+
+    let!(:loaned_books) { build_stubbed_list(:book, 4) }
+    let!(:returned_books) { build_stubbed_list(:book, 5) }
+    let!(:books) { loaned_books + returned_books }
+    let!(:user) { build_stubbed(:user) }
 
     it { should have_http_status(:success) }
-    # call .as_json on the loaned_books since the timestamp will be slightly different
-    it { expect(JSON.parse(response.body).dig("loaned_books")).to eq loaned_books.map(&:as_json) }
-    it { expect(JSON.parse(response.body).keys).to include("id", "name", "account_number", "balance_cents")  }
+    it { expect(JSON.parse(response.body).keys).to include("id", "account_number", "name", "balance_cents", "created_at", "loaned_books", "returned_books") }
+    it { expect(response.content_type).to eq("application/json; charset=utf-8") }
+    it { expect(JSON.parse(response.body)).to be_a Hash }
+    it { expect(JSON.parse(response.body).keys).to include("id", "account_number", "name", "balance_cents", "created_at", "loaned_books", "returned_books") }
+    it { expect(JSON.parse(response.body).keys).to include("id", "account_number", "name", "balance_cents", "created_at", "loaned_books", "returned_books") }
   end
-
 
   describe "POST #create" do
     context "with valid params" do
@@ -70,7 +67,7 @@ RSpec.describe UsersController, type: :controller do
         }.to change(User, :count).by(1)
       end
 
-      it "renders a JSON response with the new user" do
+       it "renders a JSON response with the new user" do
 
         post :create, params: { user: valid_attributes }, session: valid_session
         expect(response).to have_http_status(:created)
