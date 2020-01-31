@@ -36,8 +36,8 @@ RSpec.describe User, type: :model do
     end
 
     subject { user.loaned_books_count }
-    let!(:loaned_books) { build_stubbed_list(:book, 4) }
-    let!(:user) { build_stubbed(:user) }
+    let!(:loaned_books) { create_list(:book, 4) }
+    let!(:user) { create(:user) }
 
     it { expect(user).to respond_to(:loaned_books_count) }
     it { should eq 4 }
