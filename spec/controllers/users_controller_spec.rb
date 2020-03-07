@@ -36,6 +36,7 @@ RSpec.describe UsersController, type: :controller do
   end
 
   describe "GET #show" do
+
     # Note, semantics here are important: before must come before "subject!"
     before do
       allow_any_instance_of(User).to receive(:returned_books).and_return(returned_books)
@@ -43,7 +44,6 @@ RSpec.describe UsersController, type: :controller do
       allow_any_instance_of(User).to receive(:books).and_return(books)
       allow(User).to receive(:find).and_return(user)
     end
-
     subject! { get :show, params: { id: user.to_param }, session: valid_session }
 
     let!(:loaned_books) { build_stubbed_list(:book, 4) }
@@ -55,7 +55,6 @@ RSpec.describe UsersController, type: :controller do
     it { expect(JSON.parse(response.body).keys).to include("id", "account_number", "name", "balance_cents", "created_at", "loaned_books", "returned_books") }
     it { expect(response.content_type).to eq("application/json; charset=utf-8") }
     it { expect(JSON.parse(response.body)).to be_a Hash }
-    it { expect(JSON.parse(response.body).keys).to include("id", "account_number", "name", "balance_cents", "created_at", "loaned_books", "returned_books") }
     it { expect(JSON.parse(response.body).keys).to include("id", "account_number", "name", "balance_cents", "created_at", "loaned_books", "returned_books") }
   end
 
