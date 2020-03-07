@@ -1,3 +1,5 @@
+![Ruby](https://github.com/patrickclery/booklender/workflows/Ruby/badge.svg)
+
 # BookLender
 
 This is an assignment I was offered by a company who I didn't end up applying for. I decided to complete it anyways 🤷‍♂️ 

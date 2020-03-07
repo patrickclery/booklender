@@ -16,10 +16,28 @@
 # Ignore uploaded files in development.
 /storage/*
 !/storage/.keep
-.byebug_history
 
-# Ignore master key for decrypting credentials and more.
-/config/master.key
+# Project exclude paths
+/log/
+/tmp/
 /.idea/
 /coverage/
 /.rspec_status
+
+.ruby-version
+.ruby-gemset
+
+# unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
+.rvmrc
+
+# Ignore node_modules
+node_modules/
+
+# Ignore yarn files
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# TODO Comment out this rule if you are OK with secrets being uploaded to the repo
+config/initializers/secret_token.rb
+config/master.key
